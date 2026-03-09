@@ -1,0 +1,179 @@
+# Kaili — Application Flutter MedOpti
+
+> Application mobile pour soignants : consultation du planning et soumission de désidérata.
+
+---
+
+## ⚡ Démarrage rapide dans VS Code
+
+### 1. Prérequis
+
+Installer dans cet ordre :
+
+```
+1. Flutter SDK  → https://docs.flutter.dev/get-started/install
+2. VS Code      → https://code.visualstudio.com
+3. Extension "Flutter" dans VS Code (ID: dart-code.flutter)
+   → Elle installe automatiquement l'extension Dart
+```
+
+Vérifier l'installation :
+```bash
+flutter doctor
+# Tout doit être en vert (ou jaune acceptable)
+```
+
+---
+
+### 2. Ouvrir le projet
+
+```bash
+# Décompresser kaili.zip, puis :
+cd kaili
+code .
+# VS Code s'ouvre avec le projet
+```
+
+---
+
+### 3. Installer les dépendances
+
+Dans le terminal VS Code (`Ctrl+`` ` ou `Terminal > New Terminal`) :
+
+```bash
+flutter pub get
+```
+
+---
+
+### 4. Lancer l'application
+
+**Option A — Depuis VS Code :**
+- Appuyer sur `F5`
+- Ou : menu `Run > Start Debugging`
+- Choisir un device dans la barre du bas (émulateur Android, iOS Simulator, ou Chrome)
+
+**Option B — Terminal :**
+```bash
+# Sur émulateur/device connecté
+flutter run
+
+# Sur Chrome (web)
+flutter run -d chrome
+
+# Sur iOS Simulator (macOS uniquement)
+flutter run -d ios
+```
+
+---
+
+### 5. Compte de test
+
+| Champ | Valeur |
+|---|---|
+| Identifiant | `sophie.martin@chu.fr` (ou n'importe quel email) |
+| Mot de passe | `1234` (ou tout mot de passe ≥ 4 caractères) |
+
+---
+
+## 📁 Structure du projet
+
+```
+kaili/
+├── .vscode/
+│   ├── launch.json          ← Configurations de debug VS Code
+│   └── extensions.json      ← Extensions recommandées
+├── lib/
+│   ├── main.dart            ← Point d'entrée
+│   ├── core/
+│   │   └── theme/
+│   │       └── app_theme.dart    ← Design system (couleurs, typo, ombres)
+│   ├── domain/              ← Logique métier pure (pas de Flutter)
+│   │   ├── entities/        ← User, Shift, Desiderata, LeaveBalance
+│   │   └── repositories/    ← Interfaces abstraites
+│   ├── data/                ← Accès aux données
+│   │   ├── models/          ← JSON ↔ Entity mappers
+│   │   ├── datasources/     ← Mock API (→ remplacer par Dio)
+│   │   └── repositories/    ← Implémentations concrètes
+│   └── presentation/        ← UI Flutter
+│       ├── providers/       ← State management Riverpod
+│       └── screens/
+│           ├── auth/        ← Login
+│           ├── planning/    ← Vue chronologique des gardes
+│           ├── desiderata/  ← Dashboard congés + formulaire
+│           └── shell/       ← Navigation principale + Profil
+├── pubspec.yaml             ← Dépendances
+└── analysis_options.yaml   ← Règles lint
+```
+
+---
+
+## 🔌 Format JSON Planning accepté
+
+```json
+[
+  { "date": "2026-03-05", "type": "Garde 24h", "service": "Urgences" },
+  { "date": "2026-03-07", "type": "Garde de nuit", "service": "Réanimation",
+    "startTime": "19:30", "endTime": "07:30", "note": "Avec Dr. Leclerc" },
+  { "date": "2026-03-10", "type": "Congé", "service": "Urgences" }
+]
+```
+
+**Types reconnus :** `Garde 24h` · `Garde de nuit` · `Garde de jour` · `Congé` · `RTT` · `Repos` · `Formation`
+
+---
+
+## 🔧 Brancher une vraie API
+
+Modifier `lib/data/datasources/mock_datasource.dart` :
+
+```dart
+// Remplacer les méthodes mock par des appels Dio
+import 'package:dio/dio.dart';
+
+class AuthRemoteDataSource {
+  final Dio _dio = Dio(BaseOptions(baseUrl: 'https://api.medopti.fr/v1'));
+
+  Future<Map<String, dynamic>> login({
+    required String identifier,
+    required String password,
+  }) async {
+    final response = await _dio.post('/auth/login', data: {
+      'identifier': identifier,
+      'password': password,
+    });
+    return response.data as Map<String, dynamic>;
+  }
+}
+```
+
+---
+
+## 📦 Build pour production
+
+```bash
+# Android APK
+flutter build apk --release
+
+# Android App Bundle (Play Store)
+flutter build appbundle --release
+
+# iOS (macOS requis)
+flutter build ios --release
+
+# Web
+flutter build web --release
+```
+
+---
+
+## 🛠 Commandes utiles
+
+```bash
+flutter pub get          # Installer les dépendances
+flutter pub upgrade      # Mettre à jour les packages
+flutter clean            # Nettoyer le build cache
+flutter analyze          # Analyser le code
+flutter test             # Lancer les tests
+flutter devices          # Lister les devices disponibles
+```

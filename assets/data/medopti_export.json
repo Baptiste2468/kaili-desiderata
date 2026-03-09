@@ -1,0 +1,34 @@
+{
+  "Jean Dupont": {
+    "stats": {
+      "joursTravailles": 18,
+      "weekEndsTravailles": 2,
+      "heuresEstimees": 135.5,
+      "joursRepos": 13,
+      "congesPoses": 0
+    },
+    "planning": [
+      { "date": "2026-03-01", "type": "Matin" },
+      { "date": "2026-03-02", "type": "Matin" },
+      { "date": "2026-03-03", "type": "Repos" },
+      { "date": "2026-03-04", "type": "Soir" },
+      { "date": "2026-03-05", "type": "Nuit" }
+    ]
+  },
+  "Stéphane": {
+    "stats": {
+      "joursTravailles": 15,
+      "weekEndsTravailles": 1,
+      "heuresEstimees": 112.0,
+      "joursRepos": 14,
+      "congesPoses": 2
+    },
+    "planning": [
+      { "date": "2026-03-01", "type": "Repos" },
+      { "date": "2026-03-02", "type": "Soir" },
+      { "date": "2026-03-03", "type": "Nuit" },
+      { "date": "2026-03-04", "type": "Repos" },
+      { "date": "2026-03-05", "type": "Matin" }
+    ]
+  }
+}
