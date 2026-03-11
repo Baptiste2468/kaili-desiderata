@@ -1,19 +1,26 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/datasources/remote_datasource.dart';
 import '../../data/datasources/mock_datasource.dart';
+import '../../data/datasources/supabase_datasource.dart';
 import '../../data/repositories/repositories_impl.dart';
 import '../../domain/entities/entities.dart';
 import '../../domain/repositories/repositories.dart';
+import '../../core/supabase/supabase_init.dart';
 
 // ── Datasources ────────────────────────────────────────────────────────────────
-final authDataSourceProvider = Provider<AuthRemoteDataSource>((_) => AuthMockDataSource());
+final authDataSourceProvider = Provider<AuthRemoteDataSource>((_) {
+  if (SupabaseInit.enabled) return SupabaseAuthDataSource();
+  return AuthMockDataSource();
+});
 
 // on utilise le mock qui lit `assets/data/medopti_export.json`
 final planningDataSourceProvider = Provider<PlanningRemoteDataSource>((_) => PlanningMockDataSource());
 
 final desiderataDataSourceProvider = Provider<DesiderataRemoteDataSource>((_) => DesiderataMockDataSource());
-final kailiExportDataSourceProvider =
-    Provider<KailiExportRemoteDataSource>((_) => KailiExportMockDataSource());
+final kailiExportDataSourceProvider = Provider<KailiExportRemoteDataSource>((_) {
+  if (SupabaseInit.enabled) return SupabaseKailiExportDataSource();
+  return KailiExportMockDataSource();
+});
 // ── Repositories ───────────────────────────────────────────────────────────────
 final authRepositoryProvider = Provider<AuthRepository>((ref) => AuthRepositoryImpl(ref.read(authDataSourceProvider)));
 final planningRepositoryProvider = Provider<PlanningRepository>((ref) => PlanningRepositoryImpl(ref.read(planningDataSourceProvider)));

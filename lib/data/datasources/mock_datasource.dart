@@ -11,21 +11,115 @@ import 'remote_datasource.dart';
 // -------------------------------------------------------------
 
 class AuthMockDataSource implements AuthRemoteDataSource {
+  static String? currentPlanningKey;
+
+  // "Base de données" en mémoire pour l'exemple.
+  //
+  // Dans la vraie vie, cette partie serait remplacée par un backend
+  // qui stocke les mots de passe hachés dans une base de données.
+  final Map<String, Map<String, dynamic>> _users = {
+    // Compte de démonstration : Sacha Layani
+    // Identifiants acceptés :
+    // - identifiant : "sacha"
+    // - email      : "sacha.layani@kaili.fr"
+    'sacha': {
+      'password': 'KailiDemo2024!',
+      'user': {
+        'id': 'sacha',
+        'firstName': 'Sacha',
+        'lastName': 'Layani',
+        'email': 'sacha.layani@kaili.fr',
+        'role': 'Soignant',
+        'service': 'Urgences',
+      },
+    },
+    'sacha.layani@kaili.fr': {
+      'password': 'KailiDemo2024!',
+      'user': {
+        'id': 'sacha',
+        'firstName': 'Sacha',
+        'lastName': 'Layani',
+        'email': 'sacha.layani@kaili.fr',
+        'role': 'Soignant',
+        'service': 'Urgences',
+      },
+    },
+
+    // Compte de démonstration : Jean Dupont – Stépagne
+    // Identifiants acceptés :
+    // - identifiant : "jean.dupont"
+    // - email      : "jean.dupont@stepagne.fr"
+    'jean.dupont': {
+      'password': 'KailiDemo2024!',
+      'user': {
+        'id': 'jean.dupont',
+        'firstName': 'Jean',
+        'lastName': 'Dupont',
+        'email': 'jean.dupont@stepagne.fr',
+        'role': 'Soignant',
+        'service': 'Stépagne',
+      },
+    },
+    'jean.dupont@stepagne.fr': {
+      'password': 'KailiDemo2024!',
+      'user': {
+        'id': 'jean.dupont',
+        'firstName': 'Jean',
+        'lastName': 'Dupont',
+        'email': 'jean.dupont@stepagne.fr',
+        'role': 'Soignant',
+        'service': 'Stépagne',
+      },
+    },
+    // Compte de démonstration : Stéphane – Stépagne
+    // Identifiants acceptés :
+    // - identifiant : "stephane"
+    // - email      : "stephane@stepagne.fr"
+    'stephane': {
+      'password': 'KailiDemo2024!',
+      'user': {
+        'id': 'stephane',
+        'firstName': 'Stéphane',
+        'lastName': '',
+        'email': 'stephane@stepagne.fr',
+        'role': 'Soignant',
+        'service': 'Stépagne',
+      },
+    },
+    'stephane@stepagne.fr': {
+      'password': 'KailiDemo2024!',
+      'user': {
+        'id': 'stephane',
+        'firstName': 'Stéphane',
+        'lastName': '',
+        'email': 'stephane@stepagne.fr',
+        'role': 'Soignant',
+        'service': 'Stépagne',
+      },
+    },
+  };
+
   @override
   Future<Map<String, dynamic>> login({
     required String identifier,
     required String password,
   }) async {
-    // Return a dummy user object regardless of credentials.
+    final trimmedId = identifier.trim();
+    final record = _users[trimmedId];
+
+    if (record == null || record['password'] != password) {
+      throw Exception('Identifiant ou mot de passe incorrect.');
+    }
+
+    final user = record['user'] as Map<String, dynamic>;
+    final firstName = (user['firstName'] as String?)?.trim() ?? '';
+    final lastName = (user['lastName'] as String?)?.trim() ?? '';
+    final candidateKey =
+        [firstName, lastName].where((s) => s.isNotEmpty).join(' ');
+    currentPlanningKey = candidateKey.isNotEmpty ? candidateKey : trimmedId;
+
     return {
-      'user': {
-        'id': identifier,
-        'firstName': 'Jean',
-        'lastName': 'Dupont',
-        'email': '$identifier@example.com',
-        'role': 'Soignant',
-        'service': 'Urgences',
-      }
+      'user': user,
     };
   }
 }
@@ -46,8 +140,8 @@ class PlanningMockDataSource implements PlanningRemoteDataSource {
     DateTime? from,
     DateTime? to,
   }) async {
-    // Pour l'instant, on utilise "Jean Dupont" comme agent par défaut
-    final agentData = await _loadAgentData('Jean Dupont');
+    final agentKey = AuthMockDataSource.currentPlanningKey ?? 'Jean Dupont';
+    final agentData = await _loadAgentData(agentKey);
     final planning = (agentData['planning'] as List<dynamic>?)
         ?.cast<Map<String, dynamic>>() ??
         [];

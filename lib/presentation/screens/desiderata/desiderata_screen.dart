@@ -29,14 +29,13 @@ class _DesiderataScreenState extends ConsumerState<DesiderataScreen> {
   Widget build(BuildContext context) {
     // Les écoutes Riverpod doivent TOUJOURS être dans le build principal
     final desiderataAsync = ref.watch(desiderataProvider);
-    final balanceAsync = ref.watch(leaveBalanceProvider);
 
     return Scaffold(
       backgroundColor: KailiColors.background,
       body: SafeArea(
         child: _showForm
             ? _buildFormView()
-            : _buildDashboardView(desiderataAsync, balanceAsync),
+            : _buildDashboardView(desiderataAsync),
       ),
     );
   }
@@ -44,7 +43,6 @@ class _DesiderataScreenState extends ConsumerState<DesiderataScreen> {
   // ──── Vue Dashboard (Affichage des demandes) ────
   Widget _buildDashboardView(
     AsyncValue<List<Desiderata>> desiderataAsync,
-    AsyncValue<LeaveBalance> balanceAsync,
   ) {
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
@@ -67,22 +65,6 @@ class _DesiderataScreenState extends ConsumerState<DesiderataScreen> {
             ),
           ),
           const SizedBox(height: 24),
-
-          // Soldes de congés
-          Text(
-            'Soldes de congés',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: KailiColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 12),
-          balanceAsync.when(
-            loading: () => _buildBalanceShimmer(),
-            error: (e, _) => const SizedBox.shrink(),
-            data: (balance) => _buildBalanceGrid(balance),
-          ),
-          const SizedBox(height: 32),
 
           // Bouton créer désidérata
           SizedBox(
@@ -802,79 +784,6 @@ class _DesiderataScreenState extends ConsumerState<DesiderataScreen> {
           ),
           const Icon(Icons.arrow_forward_ios, size: 16, color: KailiColors.textTertiary),
         ],
-      ),
-    );
-  }
-
-  Widget _buildBalanceGrid(LeaveBalance balance) {
-    return GridView.count(
-      crossAxisCount: 3,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 10,
-      crossAxisSpacing: 10,
-      children: [
-        _buildBalanceCard('Congés', balance.congesTotal, balance.congesUsed),
-        _buildBalanceCard('RTT', balance.rttTotal, balance.rttUsed),
-        _buildBalanceCard('Récup', balance.recupTotal, balance.recupUsed),
-      ],
-    );
-  }
-
-  Widget _buildBalanceCard(String label, int total, int used) {
-    final remaining = total - used;
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: KailiColors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: KailiColors.border, width: 1),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            remaining.toString(),
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: KailiColors.primary,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: KailiColors.textSecondary,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '$used/$total',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              fontSize: 10,
-              color: KailiColors.textTertiary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBalanceShimmer() {
-    return GridView.count(
-      crossAxisCount: 3,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 10,
-      crossAxisSpacing: 10,
-      children: List.generate(
-        3,
-        (_) => Container(
-          decoration: BoxDecoration(
-            color: Colors.grey[200],
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
       ),
     );
   }
